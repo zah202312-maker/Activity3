@@ -1,0 +1,33 @@
+@model PagedList<Person>
+@{ ViewData["Title"] = "الأشخاص مقيمو النشاط"; var qs = Context.Request.Query; }
+<div class="d-flex justify-content-between mb-3"><h3>الأشخاص مقيمو النشاط</h3><a asp-action="Create" class="btn btn-primary">إضافة شخص</a></div>
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    <div class="col-md-4"><input name="q" value="@ViewBag.Q" class="form-control" placeholder="بحث بالاسم أو الهاتف أو الوظيفة" /></div>
+    <div class="col-md-3"><select name="capacity" class="form-select" asp-items="Html.GetEnumSelectList<PersonCapacity>()"><option value="">كل الصفات</option></select></div>
+    <div class="col-md-3"><select name="governorateId" class="form-select" asp-items="ViewBag.Governorates"><option value="">كل المحافظات</option></select></div>
+    <div class="col-auto"><button class="btn btn-outline-primary">بحث</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+    <thead><tr><th></th><th>#</th><th>الاسم</th><th>الصفة</th><th>الهاتف</th><th>محافظة العمل</th><th>المكتب</th><th>موظف</th><th>دورات</th><th>شارات</th><th>الأنشطة</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@if (p.HasPhoto) { <img src="@Url.Action("Photo", new { id = p.Id })" class="rounded-circle" style="width:40px;height:40px;object-fit:cover" /> }
+                else { <div class="rounded-circle bg-secondary-subtle d-inline-block" style="width:40px;height:40px"></div> }</td>
+            <td>@p.Id</td><td>@p.Name</td><td>@p.Capacity?.DisplayName()</td><td dir="ltr" class="text-end">@p.Phone</td>
+            <td>@p.Governorate?.Name</td><td>@p.Office?.Name</td><td>@(p.IsEmployee ? "نعم" : "لا")</td>
+            <td>@p.ScoutCourses</td><td>@p.BadgesCount</td><td>@p.Activities.Count</td>
+            <td class="text-end text-nowrap">
+                <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary">تفاصيل</a>
+                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" onsubmit="return confirm('حذف هذا الشخص؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form>
+            </td>
+        </tr>
+    }
+    @if (!Model.Any()) { <tr><td colspan="12" class="text-center text-muted">لا توجد نتائج.</td></tr> }
+    </tbody>
+</table></div></div>
+
+<partial name="_Pagination" model="Model" />

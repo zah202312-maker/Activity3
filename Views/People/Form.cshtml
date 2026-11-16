@@ -1,0 +1,67 @@
+@model Person
+@{ ViewData["Title"] = Model.Id == 0 ? "إضافة شخص" : "تعديل شخص"; }
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<form method="post" enctype="multipart/form-data" asp-action="@(Model.Id == 0 ? "Create" : "Edit")" asp-route-id="@Model.Id">
+<div class="row g-3">
+    <div class="col-lg-9">
+        <div class="card"><div class="card-header fw-bold">البيانات الشخصية</div><div class="card-body"><div class="row g-3">
+            <div class="col-md-6"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+            <div class="col-md-3"><label asp-for="BirthDate" class="form-label"></label><input asp-for="BirthDate" class="form-control" /></div>
+            <div class="col-md-3"><label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" dir="ltr" /></div>
+            <div class="col-md-6"><label asp-for="Education" class="form-label"></label><input asp-for="Education" class="form-control" /></div>
+            <div class="col-md-6"><label asp-for="Residence" class="form-label"></label><input asp-for="Residence" class="form-control" /></div>
+        </div></div></div>
+
+        <div class="card mt-3"><div class="card-header fw-bold">بيانات العمل</div><div class="card-body"><div class="row g-3">
+            <div class="col-md-4"><label asp-for="Capacity" class="form-label"></label>
+                <select asp-for="Capacity" asp-items="Html.GetEnumSelectList<PersonCapacity>()" class="form-select"><option value="">-- اختر --</option></select>
+                <span asp-validation-for="Capacity" class="text-danger"></span></div>
+            <div class="col-md-4"><label asp-for="FunctionAddress" class="form-label"></label><input asp-for="FunctionAddress" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="RolePlayed" class="form-label"></label><input asp-for="RolePlayed" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="GovernorateId" class="form-label"></label>
+                <select asp-for="GovernorateId" asp-items="ViewBag.Governorates" class="form-select" id="gov"><option value="">-- اختر --</option></select></div>
+            <div class="col-md-4"><label asp-for="OfficeId" class="form-label"></label>
+                <select asp-for="OfficeId" asp-items="ViewBag.Offices" class="form-select" id="office"><option value="">-- اختر --</option></select></div>
+            <div class="col-md-4 d-flex align-items-end"><div class="form-check"><input asp-for="IsEmployee" class="form-check-input" /><label asp-for="IsEmployee" class="form-check-label">موظف</label></div></div>
+        </div></div></div>
+
+        <div class="card mt-3"><div class="card-header fw-bold">الجانب الكشفي</div><div class="card-body"><div class="row g-3">
+            <div class="col-md-6"><label asp-for="ScoutCourses" class="form-label"></label><input asp-for="ScoutCourses" type="number" min="0" class="form-control" /><span asp-validation-for="ScoutCourses" class="text-danger"></span></div>
+            <div class="col-md-6"><label asp-for="BadgesCount" class="form-label"></label><input asp-for="BadgesCount" type="number" min="0" class="form-control" /><span asp-validation-for="BadgesCount" class="text-danger"></span></div>
+        </div></div></div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="card"><div class="card-header fw-bold">الصورة</div><div class="card-body text-center">
+            @if (Model.HasPhoto && Model.Id != 0)
+            {
+                <img id="preview" src="@Url.Action("Photo", "People", new { id = Model.Id })" class="img-thumbnail mb-2" style="max-height:220px" />
+                <div class="form-check text-start mb-2"><input class="form-check-input" type="checkbox" name="removePhoto" value="true" id="rm" /><label class="form-check-label" for="rm">حذف الصورة الحالية</label></div>
+            }
+            else
+            {
+                <img id="preview" class="img-thumbnail mb-2" style="max-height:220px;display:none" />
+            }
+            <div class="d-flex align-items-center justify-content-center gap-2">
+                <input type="file" name="photo" id="photoInput" accept="image/*" class="file-picker-input"
+                       data-file-picker data-file-picker-display="photoFileStatus" />
+                <label for="photoInput" class="btn btn-outline-primary file-picker-label">إضافة</label>
+                <span id="photoFileStatus">لا يوجد ملف مضاف</span>
+            </div>
+            <div class="form-text">حتى 2 ميغابايت</div>
+            <span class="text-danger d-block">@Html.ValidationMessage("photo")</span>
+        </div></div>
+    </div>
+</div>
+<div class="mt-3"><button class="btn btn-primary">حفظ</button> <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a></div>
+</form>
+
+@section Scripts {
+<script>
+    bindCascade('gov', 'office', '/Lookup/Offices', 'governorateId', []);
+    document.getElementById('photoInput').addEventListener('change', function () {
+        var f = this.files[0], img = document.getElementById('preview');
+        if (f) { img.src = URL.createObjectURL(f); img.style.display = ''; }
+    });
+</script>
+}

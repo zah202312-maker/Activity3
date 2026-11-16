@@ -1,0 +1,164 @@
+@model Activity
+@{ ViewData["Title"] = Model.Id == 0 ? "نشاط جديد" : "تعديل النشاط #" + Model.Id; }
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<form method="post" enctype="multipart/form-data" asp-action="@(Model.Id == 0 ? "Create" : "Edit")" asp-route-id="@Model.Id">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card"><div class="card-header fw-bold">بيانات النشاط</div><div class="card-body"><div class="row g-3">
+            <div class="col-md-4"><label asp-for="Date" class="form-label"></label><input asp-for="Date" class="form-control" /><span asp-validation-for="Date" class="text-danger"></span></div>
+            <div class="col-md-4"><label asp-for="ActivityType" class="form-label"></label><select asp-for="ActivityType" asp-items="Html.GetEnumSelectList<ActivityType>()" class="form-select"></select></div>
+            <div class="col-md-4"><label asp-for="Cost" class="form-label"></label><input asp-for="Cost" class="form-control" /></div>
+            <div class="col-md-6"><label asp-for="ActivityPlace" class="form-label"></label><input asp-for="ActivityPlace" class="form-control" /></div>
+            <div class="col-md-6"><label asp-for="PlaceType" class="form-label"></label><select asp-for="PlaceType" asp-items="Html.GetEnumSelectList<PlaceType>()" class="form-select"></select></div>
+            <div class="col-md-6"><label asp-for="Resources" class="form-label"></label><input asp-for="Resources" class="form-control" /></div>
+            <div class="col-md-6"><label asp-for="NumberBeneficiaries" class="form-label"></label><input asp-for="NumberBeneficiaries" class="form-control" /></div>
+            <div class="col-md-12"><label asp-for="NoteBeneficiaries" class="form-label"></label><input asp-for="NoteBeneficiaries" class="form-control" /></div>
+            <div class="col-md-12"><label asp-for="Note" class="form-label"></label><textarea asp-for="Note" rows="3" class="form-control"></textarea></div>
+        </div></div></div>
+
+        @if (Model.Id == 0)
+        {
+            <div class="card mt-3">
+                <div class="card-header fw-bold">مرفقات النشاط</div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2">
+                    <input type="file" name="activityFiles" id="activityFiles" multiple class="file-picker-input"
+                           data-file-picker data-file-picker-display="activityFilesStatus"
+                           accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,video/ogg" />
+                    <label for="activityFiles" class="btn btn-outline-primary file-picker-label">إضافة</label>
+                    <span id="activityFilesStatus">لا يوجد ملف مضاف</span>
+                    </div>
+                    <small class="form-text text-muted">يمكن اختيار عدة صور أو فيديوهات (حتى 50 ميغابايت للطلب).</small>
+                    <div id="activityFilesList" class="small mt-2">لا يوجد ملف مضاف</div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header fw-bold">تقرير النشاط</div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2">
+                    <input type="file" name="reportFiles" id="reportFiles" multiple class="file-picker-input"
+                           data-file-picker data-file-picker-display="reportFilesStatus" accept=".doc,.docx,.xls,.xlsx" />
+                    <label for="reportFiles" class="btn btn-outline-primary file-picker-label">إضافة</label>
+                    <span id="reportFilesStatus">لا يوجد ملف مضاف</span>
+                    </div>
+                    <small class="form-text text-muted">يمكن اختيار ملفات Word أو Excel بشكل منفصل عن مرفقات النشاط.</small>
+                    <div id="reportFilesList" class="small mt-2">لا يوجد ملف مضاف</div>
+                </div>
+            </div>
+        }
+
+        <div class="card mt-3"><div class="card-header fw-bold">الموقع الإداري</div><div class="card-body"><div class="row g-3">
+            <div class="col-md-3"><label asp-for="GovernorateId" class="form-label"></label>
+                <select asp-for="GovernorateId" asp-items="ViewBag.Governorates" class="form-select" id="gov"><option value="">-- اختر --</option></select></div>
+            <div class="col-md-3"><label asp-for="OfficeId" class="form-label"></label>
+                <select asp-for="OfficeId" asp-items="ViewBag.Offices" class="form-select" id="office"><option value="">-- اختر --</option></select></div>
+            <div class="col-md-3"><label asp-for="SectionId" class="form-label"></label>
+                <select asp-for="SectionId" asp-items="ViewBag.Sections" class="form-select" id="section"><option value="">-- اختر --</option></select></div>
+            <div class="col-md-3"><label asp-for="SubsidId" class="form-label"></label>
+                <select asp-for="SubsidId" asp-items="ViewBag.Subsids" class="form-select" id="subsid"><option value="">-- اختر --</option></select></div>
+            <div class="col-md-12"><label asp-for="PlanId" class="form-label"></label>
+                <select asp-for="PlanId" asp-items="ViewBag.Plans" class="form-select"><option value="">-- بدون خطة --</option></select></div>
+        </div></div></div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card"><div class="card-header fw-bold d-flex justify-content-between">
+            <span>مقيّمو النشاط</span><span class="text-muted small" id="selCount"></span></div>
+        <div class="card-body">
+            <input type="text" id="personFilter" class="form-control mb-2" placeholder="بحث بالاسم..." />
+            <div id="personList" class="border rounded p-2" style="max-height:420px;overflow:auto">
+                @foreach (var p in (List<Person>)ViewBag.People)
+                {
+                    <div class="form-check person-item">
+                        <input class="form-check-input person-chk" type="checkbox" name="PersonIds" value="@p.Id" id="p@(p.Id)" checked="@Model.PersonIds.Contains(p.Id)" />
+                        <label class="form-check-label w-100" for="p@(p.Id)">@p.Name <span class="text-muted small">@p.FunctionAddress</span></label>
+                    </div>
+                }
+                @if (!((List<Person>)ViewBag.People).Any())
+                {
+                    <div class="text-muted">لا يوجد أشخاص. أضفهم أولاً من صفحة <a asp-controller="People" asp-action="Index" target="_blank">الأشخاص</a>.</div>
+                }
+            </div>
+        </div></div>
+    </div>
+</div>
+<div class="mt-3"><button class="btn btn-primary">حفظ</button> <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a></div>
+</form>
+
+@section Scripts {
+<script>
+    bindCascade('gov', 'office', '/Lookup/Offices', 'governorateId', ['section', 'subsid']);
+    bindCascade('office', 'section', '/Lookup/Sections', 'officeId', ['subsid']);
+    bindCascade('section', 'subsid', '/Lookup/Subsids', 'sectionId', []);
+
+    function updateCount() {
+        document.getElementById('selCount').textContent = 'المحدد: ' + document.querySelectorAll('.person-chk:checked').length;
+    }
+    document.querySelectorAll('.person-chk').forEach(function (c) { c.addEventListener('change', updateCount); });
+    updateCount();
+
+    document.getElementById('personFilter').addEventListener('input', function () {
+        var t = this.value.toLowerCase();
+        document.querySelectorAll('.person-item').forEach(function (d) {
+            d.style.display = (t && d.textContent.toLowerCase().indexOf(t) < 0) ? 'none' : '';
+        });
+    });
+
+    var activityFiles = document.getElementById('activityFiles');
+    if (activityFiles) {
+        function enableMultiSelect(fileInput, listId) {
+            var selectedFiles = new DataTransfer();
+            var fileList = document.getElementById(listId);
+
+            function renderFiles() {
+                fileList.replaceChildren();
+                var status = document.getElementById(fileInput.dataset.filePickerDisplay);
+                if (selectedFiles.files.length === 0) {
+                    fileList.textContent = 'لا يوجد ملف مضاف';
+                    status.textContent = 'لا يوجد ملف مضاف';
+                    return;
+                }
+                status.textContent = Array.from(selectedFiles.files).map(function (file) { return file.name; }).join('، ');
+                Array.from(selectedFiles.files).forEach(function (file, index) {
+                    var row = document.createElement('div');
+                    row.className = 'd-flex justify-content-between align-items-center border rounded p-2 mb-1';
+
+                    var name = document.createElement('span');
+                    name.className = 'text-break me-2';
+                    name.textContent = file.name;
+
+                    var remove = document.createElement('button');
+                    remove.type = 'button';
+                    remove.className = 'btn btn-sm btn-outline-danger flex-shrink-0';
+                    remove.textContent = 'إزالة';
+                    remove.addEventListener('click', function () {
+                        var remainingFiles = new DataTransfer();
+                        Array.from(selectedFiles.files).forEach(function (selectedFile, fileIndex) {
+                            if (fileIndex !== index) remainingFiles.items.add(selectedFile);
+                        });
+                        selectedFiles = remainingFiles;
+                        fileInput.files = selectedFiles.files;
+                        renderFiles();
+                    });
+
+                    row.appendChild(name);
+                    row.appendChild(remove);
+                    fileList.appendChild(row);
+                });
+            }
+
+            fileInput.addEventListener('change', function () {
+                Array.from(this.files).forEach(function (file) {
+                    selectedFiles.items.add(file);
+                });
+                this.files = selectedFiles.files;
+                renderFiles();
+            });
+        }
+
+        enableMultiSelect(activityFiles, 'activityFilesList');
+        enableMultiSelect(document.getElementById('reportFiles'), 'reportFilesList');
+    }
+</script>
+}

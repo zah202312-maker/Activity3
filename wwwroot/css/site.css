@@ -1,0 +1,48 @@
+/* ألوان التطبيق — تتغير حسب الوضع (data-bs-theme على <html>) */
+:root, [data-bs-theme="light"] {
+  --app-bg: #f5f7fa;
+  --app-thead-bg: #eef2f7;
+  --app-card-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+[data-bs-theme="dark"] {
+  --app-bg: #121417;
+  --app-thead-bg: #23272e;
+  --app-card-shadow: 0 1px 4px rgba(0,0,0,.6);
+  --bs-body-bg: #1a1d21;          /* البطاقات والجداول والحقول */
+  --bs-body-bg-rgb: 26, 29, 33;
+  color-scheme: dark;             /* حقول التاريخ وأشرطة التمرير بلون داكن */
+}
+
+body { background: var(--app-bg); font-family: "Segoe UI", Tahoma, Arial, sans-serif; }
+.card { border: 0; box-shadow: var(--app-card-shadow); }
+.table thead th { background: var(--app-thead-bg); white-space: nowrap; }
+.stat-card .display-6 { font-weight: 700; }
+
+/* شريط التنقل أغمق قليلاً في الوضع الليلي */
+[data-bs-theme="dark"] .navbar.bg-primary { background-color: #0b3d91 !important; }
+
+/* زر تبديل الوضع: يظهر النص المناسب للوضع الحالي */
+.theme-label-light { display: none; }
+[data-bs-theme="dark"] .theme-label-dark { display: none; }
+[data-bs-theme="dark"] .theme-label-light { display: inline; }
+
+.file-picker-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.file-picker-input:focus + .file-picker-label {
+  outline: 3px solid rgba(13, 110, 253, .35);
+  outline-offset: 2px;
+}
+@media print {
+  .no-print, .navbar, .alert { display: none !important; }
+  body { background: #fff; }
+  .card { box-shadow: none; border: 1px solid #ccc; }
+}

@@ -1,0 +1,19 @@
+@{ ViewData["Title"] = "التقارير"; }
+<h3 class="mb-3">التقارير</h3>
+<div class="row g-3">
+    <div class="col-md-4"><div class="card h-100"><div class="card-header fw-bold">تقرير شخص</div><div class="card-body">
+        <form method="get" asp-action="Person">
+            <select name="id" class="form-select mb-3" asp-items="ViewBag.People" required><option value="">-- اختر الشخص --</option></select>
+            <button class="btn btn-primary">عرض</button>
+        </form></div></div></div>
+    <div class="col-md-4"><div class="card h-100"><div class="card-header fw-bold">تقرير نشاط</div><div class="card-body">
+        <form method="get" asp-action="Activity">
+            <select name="id" class="form-select mb-3" asp-items="ViewBag.Activities" required><option value="">-- اختر النشاط --</option></select>
+            <button class="btn btn-primary">عرض</button>
+        </form></div></div></div>
+    <div class="col-md-4"><div class="card h-100"><div class="card-header fw-bold">الأنشطة بين تاريخين</div><div class="card-body">
+        <form method="get" asp-action="Between">
+            <div class="row g-2 mb-3"><div class="col"><input type="date" name="fromDate" class="form-control" /></div><div class="col"><input type="date" name="toDate" class="form-control" /></div></div>
+            <button class="btn btn-primary">عرض</button>
+        </form></div></div></div>
+</div>

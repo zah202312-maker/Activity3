@@ -1,0 +1,9 @@
+@model Governorate
+@{ ViewData["Title"] = Model.Name; }
+<div class="d-flex justify-content-between mb-3"><h3>@Model.Name</h3><a asp-action="Index" class="btn btn-outline-secondary">رجوع</a></div>
+<div class="card"><div class="card-header fw-bold">المكاتب</div>
+<ul class="list-group list-group-flush">
+@foreach (var o in Model.Offices.OrderBy(x => x.Name)) { <li class="list-group-item"><a asp-controller="Offices" asp-action="Details" asp-route-id="@o.Id">@o.Name</a></li> }
+@if (!Model.Offices.Any()) { <li class="list-group-item text-muted">لا توجد مكاتب.</li> }
+</ul></div>
+@await Component.InvokeAsync("Attachments", new { ownerType = "Governorate", ownerId = Model.Id })

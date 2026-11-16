@@ -1,0 +1,27 @@
+@using ActivityApp.Controllers
+@model UserFormVm
+@{ ViewData["Title"] = Model.Id == 0 ? "مستخدم جديد" : "تعديل مستخدم"; }
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="card"><div class="card-body">
+<form method="post" asp-action="@(Model.Id == 0 ? "Create" : "Edit")" asp-route-id="@Model.Id">
+    <div class="row g-3">
+        <div class="col-md-4"><label asp-for="UserName" class="form-label">اسم المستخدم</label><input asp-for="UserName" class="form-control" /><span asp-validation-for="UserName" class="text-danger"></span></div>
+        <div class="col-md-4"><label asp-for="Password" class="form-label">كلمة المرور @(Model.Id != 0 ? "(اتركها فارغة بدون تغيير)" : "")</label><input asp-for="Password" type="password" class="form-control" autocomplete="new-password" /><span asp-validation-for="Password" class="text-danger"></span></div>
+        <div class="col-md-4"><label asp-for="UserType" class="form-label">النوع</label><select asp-for="UserType" asp-items="Html.GetEnumSelectList<UserType>()" class="form-select"></select></div>
+        <div class="col-12 form-check ms-3"><input asp-for="Active" class="form-check-input" /><label asp-for="Active" class="form-check-label">حساب فعّال</label></div>
+        <div class="col-12">
+            <label class="form-label fw-bold">الأدوار</label>
+            <div>
+            @foreach (var r in Model.AllRoles)
+            {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="RoleIds" value="@r.Id" id="r@(r.Id)" checked="@Model.RoleIds.Contains(r.Id)" />
+                    <label class="form-check-label" for="r@(r.Id)">@(r.ArRole ?? r.Name)</label>
+                </div>
+            }
+            </div>
+        </div>
+    </div>
+    <div class="mt-3"><button class="btn btn-primary">حفظ</button> <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a></div>
+</form>
+</div></div>

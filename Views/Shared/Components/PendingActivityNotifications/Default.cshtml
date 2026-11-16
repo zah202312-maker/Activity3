@@ -1,0 +1,27 @@
+@model ActivityApp.Helpers.PendingActivityNotificationsVm
+@if (Model.Count > 0)
+{
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+            أنشطة تحتاج تقييماً
+            <span class="badge rounded-pill bg-danger">@Model.Count</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><h6 class="dropdown-header">أنشطة بانتظار تقييمك</h6></li>
+            @foreach (var activity in Model.Activities)
+            {
+                <li>
+                    <a class="dropdown-item" asp-controller="Activities" asp-action="EvaluationDetails" asp-route-id="@activity.Id">
+                        نشاط #@activity.Id - @activity.ActivityPlace
+                        <small class="d-block text-muted">@activity.Date?.ToString("yyyy-MM-dd")</small>
+                    </a>
+                </li>
+            }
+            @if (Model.Count > Model.Activities.Count)
+            {
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item text-primary" asp-controller="Activities" asp-action="Evaluation">عرض كل الأنشطة (@Model.Count)</a></li>
+            }
+        </ul>
+    </li>
+}

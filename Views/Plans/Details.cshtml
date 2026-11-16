@@ -1,0 +1,67 @@
+@model Plan
+@{ ViewData["Title"] = Model.ActivityTitle; }
+<div class="d-flex justify-content-between mb-3"><h3>@Model.ActivityTitle</h3>
+    <div><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">تعديل</a> <a asp-action="Index" class="btn btn-outline-secondary">رجوع</a></div></div>
+
+<div class="card mb-3"><div class="card-body"><dl class="row mb-0">
+    <dt class="col-sm-3">الجهة المنفذة</dt><dd class="col-sm-9">@Model.ExecutingAgency</dd>
+    <dt class="col-sm-3">مشرف النشاط</dt><dd class="col-sm-9">@Model.ActivitySupervisor</dd>
+    <dt class="col-sm-3">الفئة المستهدفة</dt><dd class="col-sm-9">@Model.TargetGroup</dd>
+    <dt class="col-sm-3">الجهة المعدّة</dt><dd class="col-sm-9">@Model.PreparedEntity</dd>
+    <dt class="col-sm-3">مكان النشاط</dt><dd class="col-sm-9">@Model.PlaceOfActivity</dd>
+    <dt class="col-sm-3">تاريخ إعداد الخطة</dt><dd class="col-sm-9">@Model.DatePreparation?.ToString("yyyy-MM-dd")</dd>
+    <dt class="col-sm-3">تاريخ النشاط</dt><dd class="col-sm-9">@Model.ActivityDate?.ToString("yyyy-MM-dd")</dd>
+    <dt class="col-sm-3">الضوابط</dt><dd class="col-sm-9">@Model.Rules</dd>
+</dl></div></div>
+
+<div class="card mb-3">
+    <div class="card-header fw-bold">الإجراءات</div>
+    <div class="card-body">
+        <form method="post" asp-action="AddProcedure" class="row g-2 mb-3">
+            <input type="hidden" name="planId" value="@Model.Id" />
+            <div class="col-md-4"><input name="procedure" class="form-control" placeholder="الإجراء" required /></div>
+            <div class="col-md-2"><input name="date" type="date" class="form-control" /></div>
+            <div class="col-md-4"><input name="meanImplementation" class="form-control" placeholder="وسيلة التنفيذ" /></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100">إضافة</button></div>
+        </form>
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>الإجراء</th><th>التاريخ</th><th>وسيلة التنفيذ</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var x in Model.Procedures)
+            {
+                <tr><td>@x.Procedure</td><td>@x.Date?.ToString("yyyy-MM-dd")</td><td>@x.MeanImplementation</td>
+                    <td class="text-end"><form asp-action="DeleteProcedure" asp-route-id="@x.Id" method="post" onsubmit="return confirm('حذف الإجراء؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form></td></tr>
+            }
+            @if (!Model.Procedures.Any()) { <tr><td colspan="4" class="text-muted">لا توجد إجراءات.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header fw-bold d-flex justify-content-between"><span>الموارد المالية</span><span>الإجمالي: @Model.FinanceResources.Sum(f => f.Amount).ToString("N2")</span></div>
+    <div class="card-body">
+        <form method="post" asp-action="AddFinance" class="row g-2 mb-3">
+            <input type="hidden" name="planId" value="@Model.Id" />
+            <div class="col-md-3"><input name="material" class="form-control" placeholder="المادة" required /></div>
+            <div class="col-md-1"><input name="number" type="number" class="form-control" placeholder="العدد" value="1" /></div>
+            <div class="col-md-2"><input name="placeBuy" class="form-control" placeholder="مكان الشراء" /></div>
+            <div class="col-md-2"><input name="amount" type="number" step="0.01" class="form-control" placeholder="المبلغ" /></div>
+            <div class="col-md-2"><input name="sourceDrainage" class="form-control" placeholder="مصدر الصرف" /></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100">إضافة</button></div>
+        </form>
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>المادة</th><th>العدد</th><th>مكان الشراء</th><th>المبلغ</th><th>مصدر الصرف</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var x in Model.FinanceResources)
+            {
+                <tr><td>@x.Material</td><td>@x.Number</td><td>@x.PlaceBuy</td><td>@x.Amount.ToString("N2")</td><td>@x.SourceDrainage</td>
+                    <td class="text-end"><form asp-action="DeleteFinance" asp-route-id="@x.Id" method="post" onsubmit="return confirm('حذف المورد؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form></td></tr>
+            }
+            @if (!Model.FinanceResources.Any()) { <tr><td colspan="6" class="text-muted">لا توجد موارد مالية.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@await Component.InvokeAsync("Attachments", new { ownerType = "Plan", ownerId = Model.Id })

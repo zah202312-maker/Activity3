@@ -1,0 +1,99 @@
+@model ActivityApp.Helpers.AttachmentsVm
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isActivity = Model.OwnerType == "Activity";
+    var isActivityReport = Model.OwnerType == "ActivityReport";
+    var fileInputId = "attachment-files-" + Guid.NewGuid().ToString("N");
+}
+<div class="card mt-4">
+    <div class="card-header fw-bold">@(isActivity ? "مرفقات النشاط" : isActivityReport ? "تقرير النشاط" : "المرفقات")</div>
+    <div class="card-body">
+        <form asp-controller="Files" asp-action="Upload" method="post" enctype="multipart/form-data" class="row g-2 mb-3">
+            <input type="hidden" name="ownerType" value="@Model.OwnerType" />
+            <input type="hidden" name="ownerId" value="@Model.OwnerId" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <div class="col-md-9">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="file" name="files" id="@fileInputId" multiple class="file-picker-input"
+                           data-file-picker data-file-picker-display="@(fileInputId + "-status")"
+                           accept="@(isActivity ? "image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,video/ogg" : isActivityReport ? ".doc,.docx,.xls,.xlsx" : null)" required />
+                    <label for="@fileInputId" class="btn btn-outline-primary file-picker-label">إضافة</label>
+                    <span id="@(fileInputId + "-status")">لا يوجد ملف مضاف</span>
+                </div>
+                @if (isActivity) { <small class="form-text text-muted">يمكن إرفاق عدة صور وفيديوهات (حتى 50 ميغابايت للطلب).</small> }
+                else if (isActivityReport) { <small class="form-text text-muted">يمكن إرفاق عدة ملفات Word وExcel.</small> }
+            </div>
+            <div class="col-md-3"><button class="btn btn-primary w-100">رفع</button></div>
+        </form>
+        @if (!Model.Files.Any())
+        {
+            <p class="text-muted mb-0">@(isActivity ? "لا توجد مرفقات للنشاط." : isActivityReport ? "لا يوجد تقرير مرفق." : "لا توجد مرفقات.")</p>
+        }
+        else if (isActivity)
+        {
+            <div class="row g-3">
+                @foreach (var f in Model.Files)
+                {
+                    var extension = System.IO.Path.GetExtension(f.Name).ToLowerInvariant();
+                    var isImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(extension);
+                    var isVideo = new[] { ".mp4", ".webm", ".mov", ".ogv" }.Contains(extension);
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="border rounded p-2 h-100">
+                            @if (isImage)
+                            {
+                                <img src="@Url.Action("Preview", "Files", new { id = f.Id })" alt="@f.Name" class="img-fluid rounded mb-2" />
+                            }
+                            else if (isVideo)
+                            {
+                                <video controls preload="metadata" class="w-100 rounded mb-2">
+                                    <source src="@Url.Action("Preview", "Files", new { id = f.Id })" type="@f.ContentType" />
+                                    المتصفح لا يدعم تشغيل الفيديو.
+                                </video>
+                            }
+                            else
+                            {
+                                <div class="text-muted small mb-2">ملف مرفق سابق</div>
+                            }
+                            <div class="small text-break">@f.Name</div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">@(f.Size < 1024 * 1024 ? $"{f.Size / 1024.0:0.#} KB" : $"{f.Size / 1048576.0:0.#} MB")</small>
+                                <div class="text-nowrap">
+                                    <a class="btn btn-sm btn-outline-primary" asp-controller="Files" asp-action="Download" asp-route-id="@f.Id">تنزيل</a>
+                                    <form asp-controller="Files" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('حذف هذا الملف؟');">
+                                        <input type="hidden" name="id" value="@f.Id" />
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                        <button class="btn btn-sm btn-outline-danger">حذف</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>الملف</th><th>الحجم</th><th>التاريخ</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var f in Model.Files)
+                {
+                    <tr>
+                        <td>@f.Name</td>
+                        <td>@(f.Size < 1024 * 1024 ? $"{f.Size / 1024.0:0.#} KB" : $"{f.Size / 1048576.0:0.#} MB")</td>
+                        <td>@f.InsertDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" asp-controller="Files" asp-action="Download" asp-route-id="@f.Id">تنزيل</a>
+                            <form asp-controller="Files" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('حذف هذا الملف؟');">
+                                <input type="hidden" name="id" value="@f.Id" />
+                                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                <button class="btn btn-sm btn-outline-danger">حذف</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

@@ -1,0 +1,19 @@
+@model PagedList<Governorate>
+@{ ViewData["Title"] = "المحافظات"; }
+<div class="d-flex justify-content-between mb-3"><h3>المحافظات</h3>@if (User.IsInRole("Admin")) { <a asp-action="Create" class="btn btn-primary">إضافة محافظة</a> }</div>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>الاسم</th><th>عدد المكاتب</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var g in Model)
+    {
+        <tr>
+            <td>@g.Id</td><td>@g.Name</td><td>@g.Offices.Count</td>
+            <td class="text-end text-nowrap">
+                <a asp-action="Details" asp-route-id="@g.Id" class="btn btn-sm btn-outline-secondary">تفاصيل</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table></div></div>
+
+<partial name="_Pagination" model="Model" />

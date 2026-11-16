@@ -1,0 +1,19 @@
+@model Plan
+@{ ViewData["Title"] = Model.Id == 0 ? "خطة جديدة" : "تعديل الخطة"; }
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="card"><div class="card-body">
+<form method="post" asp-action="@(Model.Id == 0 ? "Create" : "Edit")" asp-route-id="@Model.Id">
+<div class="row g-3">
+    <div class="col-md-12"><label asp-for="ActivityTitle" class="form-label"></label><input asp-for="ActivityTitle" class="form-control" /><span asp-validation-for="ActivityTitle" class="text-danger"></span></div>
+    <div class="col-md-4"><label asp-for="ExecutingAgency" class="form-label"></label><input asp-for="ExecutingAgency" class="form-control" /></div>
+    <div class="col-md-4"><label asp-for="ActivitySupervisor" class="form-label"></label><input asp-for="ActivitySupervisor" class="form-control" /></div>
+    <div class="col-md-4"><label asp-for="TargetGroup" class="form-label"></label><input asp-for="TargetGroup" class="form-control" /></div>
+    <div class="col-md-4"><label asp-for="PreparedEntity" class="form-label"></label><input asp-for="PreparedEntity" class="form-control" /></div>
+    <div class="col-md-4"><label asp-for="PlaceOfActivity" class="form-label"></label><input asp-for="PlaceOfActivity" class="form-control" /></div>
+    <div class="col-md-2"><label asp-for="DatePreparation" class="form-label"></label><input asp-for="DatePreparation" class="form-control" /></div>
+    <div class="col-md-2"><label asp-for="ActivityDate" class="form-label"></label><input asp-for="ActivityDate" class="form-control" /></div>
+    <div class="col-md-12"><label asp-for="Rules" class="form-label"></label><textarea asp-for="Rules" rows="3" class="form-control"></textarea></div>
+</div>
+<div class="mt-3"><button class="btn btn-primary">حفظ</button> <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a></div>
+</form>
+</div></div>

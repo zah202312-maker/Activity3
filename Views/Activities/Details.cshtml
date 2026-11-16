@@ -1,0 +1,27 @@
+@model Activity
+@{ ViewData["Title"] = "النشاط #" + Model.Id; }
+<div class="d-flex justify-content-between mb-3"><h3>النشاط #@Model.Id</h3>
+    <div>
+        <a asp-controller="Reports" asp-action="Activity" asp-route-id="@Model.Id" class="btn btn-outline-primary">تقرير للطباعة</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">تعديل</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">رجوع</a>
+    </div></div>
+<div class="card"><div class="card-body"><dl class="row mb-0">
+    <dt class="col-sm-3">التاريخ</dt><dd class="col-sm-9">@Model.Date?.ToString("yyyy-MM-dd")</dd>
+    <dt class="col-sm-3">نوع النشاط</dt><dd class="col-sm-9">@Model.ActivityType.DisplayName()</dd>
+    <dt class="col-sm-3">المكان</dt><dd class="col-sm-9">@Model.ActivityPlace (@Model.PlaceType.DisplayName())</dd>
+    <dt class="col-sm-3">الموقع الإداري</dt><dd class="col-sm-9">@Model.Governorate?.Name / @Model.Office?.Name / @Model.Section?.Name / @Model.Subsid?.Name</dd>
+    <dt class="col-sm-3">الخطة</dt><dd class="col-sm-9">@if (Model.Plan != null) { <a asp-controller="Plans" asp-action="Details" asp-route-id="@Model.Plan.Id">@Model.Plan.ActivityTitle</a> }</dd>
+    <dt class="col-sm-3">الكلفة</dt><dd class="col-sm-9">@Model.Cost</dd>
+    <dt class="col-sm-3">الموارد</dt><dd class="col-sm-9">@Model.Resources</dd>
+    <dt class="col-sm-3">عدد الأفراد</dt><dd class="col-sm-9">@Model.NumberBeneficiaries</dd>
+    <dt class="col-sm-3">ملاحظات المستفيدين</dt><dd class="col-sm-9">@Model.NoteBeneficiaries</dd>
+    <dt class="col-sm-3">ملاحظات</dt><dd class="col-sm-9">@Model.Note</dd>
+</dl></div></div>
+<div class="card mt-3"><div class="card-header fw-bold">مقيّمو النشاط (@Model.People.Count)</div>
+<ul class="list-group list-group-flush">
+@foreach (var p in Model.People.OrderBy(x => x.Name)) { <li class="list-group-item"><a asp-controller="People" asp-action="Details" asp-route-id="@p.Id">@p.Name</a> <span class="text-muted">@p.FunctionAddress</span></li> }
+@if (!Model.People.Any()) { <li class="list-group-item text-muted">لا يوجد مقيّمو نشاط.</li> }
+</ul></div>
+@await Component.InvokeAsync("Attachments", new { ownerType = "Activity", ownerId = Model.Id })
+@await Component.InvokeAsync("Attachments", new { ownerType = "ActivityReport", ownerId = Model.Id })

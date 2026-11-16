@@ -1,0 +1,4 @@
+@model Subsid
+@{ ViewData["Title"] = Model.Name; }
+<div class="d-flex justify-content-between mb-3"><h3>@Model.Section?.Office?.Governorate?.Name / @Model.Section?.Office?.Name / @Model.Section?.Name / @Model.Name</h3><a asp-action="Index" class="btn btn-outline-secondary">رجوع</a></div>
+@await Component.InvokeAsync("Attachments", new { ownerType = "Subsid", ownerId = Model.Id })

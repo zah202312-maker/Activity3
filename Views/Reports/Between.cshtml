@@ -1,0 +1,14 @@
+@model List<Activity>
+@{ ViewData["Title"] = "تقرير الأنشطة"; }
+<div class="d-flex justify-content-between mb-3 no-print"><h3>الأنشطة بين تاريخين</h3><button onclick="window.print()" class="btn btn-primary">طباعة</button></div>
+<p>من: @(((DateTime?)ViewBag.From)?.ToString("yyyy-MM-dd") ?? "-") &nbsp; إلى: @(((DateTime?)ViewBag.To)?.ToString("yyyy-MM-dd") ?? "-")</p>
+<div class="card"><div class="table-responsive"><table class="table mb-0">
+    <thead><tr><th>#</th><th>التاريخ</th><th>النوع</th><th>المحافظة</th><th>المكتب</th><th>المكان</th><th>مقيّمو النشاط</th><th>عدد الأفراد</th><th>الكلفة</th></tr></thead>
+    <tbody>
+    @foreach (var a in Model)
+    {
+        <tr><td>@a.Id</td><td>@a.Date?.ToString("yyyy-MM-dd")</td><td>@a.ActivityType.DisplayName()</td><td>@a.Governorate?.Name</td><td>@a.Office?.Name</td><td>@a.ActivityPlace</td><td>@a.People.Count</td><td>@a.NumberBeneficiaries</td><td>@a.Cost</td></tr>
+    }
+    </tbody>
+    <tfoot><tr><th colspan="7">الإجمالي (@Model.Count نشاط)</th><th>@Model.Sum(x => x.NumberBeneficiaries ?? 0)</th><th>@Model.Sum(x => x.Cost ?? 0)</th></tr></tfoot>
+</table></div></div>

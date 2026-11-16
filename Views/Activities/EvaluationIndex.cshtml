@@ -1,0 +1,75 @@
+@model PagedList<Activity>
+@{ ViewData["Title"] = "تقييم النشاط"; }
+<h3 class="mb-3">تقييم النشاط</h3>
+<form method="get" class="card card-body mb-3">
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    <div class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <label for="fromDate" class="form-label">من تاريخ</label>
+            <input id="fromDate" name="fromDate" type="date" class="form-control" value="@ViewBag.FromDate" />
+        </div>
+        <div class="col-md-2">
+            <label for="toDate" class="form-label">إلى تاريخ</label>
+            <input id="toDate" name="toDate" type="date" class="form-control" value="@ViewBag.ToDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="governorateId" class="form-label">المحافظة</label>
+            <select id="governorateId" name="governorateId" class="form-select" asp-items="ViewBag.Governorates">
+                <option value="">كل المحافظات</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="evaluationCompleted" class="form-label">حالة التقييم</label>
+            <select id="evaluationCompleted" name="evaluationCompleted" class="form-select">
+                <option value="">كل الحالات</option>
+                <option value="true" selected="@(ViewBag.EvaluationCompleted == "true")">مكتمل</option>
+                <option value="false" selected="@(ViewBag.EvaluationCompleted == "false")">غير مكتمل</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">بحث</button>
+            <a asp-action="Evaluation" class="btn btn-outline-secondary">مسح الفلاتر</a>
+        </div>
+    </div>
+</form>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>التاريخ</th><th>المحافظة</th><th>مكان النشاط</th><th>عدد الأفراد</th><th>حالة التقييم</th><th>التقدير النهائي</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var activity in Model)
+            {
+                <tr>
+                    <td>@activity.Id</td>
+                    <td>@activity.Date?.ToString("yyyy-MM-dd")</td>
+                    <td>@activity.Governorate?.Name</td>
+                    <td>@activity.ActivityPlace</td>
+                    <td>@activity.NumberBeneficiaries</td>
+                    <td>
+                        @if (activity.EvaluationCompleted)
+                        {
+                            <span class="badge bg-success">تم التقييم</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">لم يكتمل التقييم</span>
+                        }
+                    </td>
+                    <td>@(activity.OverallEvaluation ?? "—")</td>
+                    <td class="text-end">
+                        <a asp-action="EvaluationDetails" asp-route-id="@activity.Id" class="btn btn-sm btn-outline-primary">عرض التقييم</a>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="8" class="text-center text-muted">لا توجد أنشطة.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<partial name="_Pagination" model="Model" />

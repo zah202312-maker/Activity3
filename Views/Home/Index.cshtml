@@ -1,0 +1,34 @@
+@{ ViewData["Title"] = "الرئيسية"; }
+<h3 class="mb-4">لوحة المعلومات</h3>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-2"><div class="card stat-card text-center p-3"><div class="text-muted">الأنشطة</div><div class="display-6">@ViewBag.Activities</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card stat-card text-center p-3"><div class="text-muted">الخطط</div><div class="display-6">@ViewBag.Plans</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card stat-card text-center p-3"><div class="text-muted">الأشخاص</div><div class="display-6">@ViewBag.People</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card stat-card text-center p-3"><div class="text-muted">المحافظات</div><div class="display-6">@ViewBag.Governorates</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card stat-card text-center p-3"><div class="text-muted">عدد الأفراد</div><div class="display-6">@ViewBag.Beneficiaries</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card stat-card text-center p-3"><div class="text-muted">إجمالي الكلفة</div><div class="display-6">@(((int)ViewBag.Cost).ToString("N0"))</div></div></div>
+</div>
+<div class="card">
+    <div class="card-header fw-bold d-flex justify-content-between">
+        <span>آخر الأنشطة</span>
+        <a asp-controller="Activities" asp-action="Create" class="btn btn-sm btn-primary">نشاط جديد</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>#</th><th>التاريخ</th><th>النوع</th><th>المحافظة</th><th>المكان</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var a in (List<Activity>)ViewBag.Latest)
+            {
+                <tr>
+                    <td>@a.Id</td>
+                    <td>@a.Date?.ToString("yyyy-MM-dd")</td>
+                    <td>@a.ActivityType.DisplayName()</td>
+                    <td>@a.Governorate?.Name</td>
+                    <td>@a.ActivityPlace</td>
+                    <td><a asp-controller="Activities" asp-action="Details" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">عرض</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

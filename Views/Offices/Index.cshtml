@@ -1,0 +1,26 @@
+@model PagedList<Office>
+@{ ViewData["Title"] = "المكاتب"; }
+<div class="d-flex justify-content-between mb-3"><h3>المكاتب</h3><a asp-action="Create" class="btn btn-primary">إضافة مكتب</a></div>
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    <div class="col-md-4"><select name="governorateId" class="form-select" asp-items="ViewBag.Governorates"><option value="">كل المحافظات</option></select></div>
+    <div class="col-auto"><button class="btn btn-outline-primary">بحث</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>المحافظة</th><th>المكتب</th><th>الرمز</th><th>الأقسام</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var o in Model)
+    {
+        <tr>
+            <td>@o.Id</td><td>@o.Governorate?.Name</td><td>@o.Name</td><td>@o.Code</td><td>@o.Sections.Count</td>
+            <td class="text-end text-nowrap">
+                <a asp-action="Details" asp-route-id="@o.Id" class="btn btn-sm btn-outline-secondary">تفاصيل</a>
+                <a asp-action="Edit" asp-route-id="@o.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                <form asp-action="Delete" asp-route-id="@o.Id" method="post" class="d-inline" onsubmit="return confirm('حذف المكتب؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table></div></div>
+
+<partial name="_Pagination" model="Model" />

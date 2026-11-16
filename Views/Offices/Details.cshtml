@@ -1,0 +1,9 @@
+@model Office
+@{ ViewData["Title"] = Model.Name; }
+<div class="d-flex justify-content-between mb-3"><h3>@Model.Governorate?.Name / @Model.Name</h3><a asp-action="Index" class="btn btn-outline-secondary">رجوع</a></div>
+<div class="card"><div class="card-header fw-bold">الأقسام</div>
+<ul class="list-group list-group-flush">
+@foreach (var s in Model.Sections.OrderBy(x => x.Name)) { <li class="list-group-item"><a asp-controller="Sections" asp-action="Details" asp-route-id="@s.Id">@s.Name</a></li> }
+@if (!Model.Sections.Any()) { <li class="list-group-item text-muted">لا توجد أقسام.</li> }
+</ul></div>
+@await Component.InvokeAsync("Attachments", new { ownerType = "Office", ownerId = Model.Id })

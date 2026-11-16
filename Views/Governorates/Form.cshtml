@@ -1,0 +1,53 @@
+@model Governorate
+@{
+    ViewData["Title"] = "إضافة محافظة";
+    var available = (List<string>)ViewBag.Available;
+    var isOther = ViewBag.IsOther == true
+                  || Model.Name == IraqGovernorates.OtherValue
+                  || (!string.IsNullOrEmpty(Model.Name) && !available.Contains(Model.Name))
+                  || available.Count == 0;
+    var otherName = (string?)ViewBag.OtherName ?? (isOther && Model.Name != IraqGovernorates.OtherValue ? Model.Name : "");
+}
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="card"><div class="card-body">
+<form method="post" asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label for="Name" class="form-label">اسم المحافظة</label>
+        <select id="Name" name="Name" class="form-select" required>
+            <option value="">-- اختر المحافظة --</option>
+            @foreach (var n in available)
+            {
+                <option value="@n" selected="@(Model.Name == n)">@n</option>
+            }
+            <option value="@IraqGovernorates.OtherValue" selected="@isOther">أخرى (إدخال يدوي)</option>
+        </select>
+        @if (available.Count == 0)
+        {
+            <div class="form-text">تمت إضافة كل محافظات العراق. يمكنك إدخال اسم آخر يدوياً.</div>
+        }
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3" id="otherNameGroup" style="@(isOther ? "" : "display:none")">
+        <label for="otherName" class="form-label">اسم المحافظة (يدوي)</label>
+        <input id="otherName" name="otherName" class="form-control" maxlength="150" value="@otherName" />
+    </div>
+    <button class="btn btn-primary">حفظ</button> <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+</form>
+</div></div>
+
+<script>
+    (function () {
+        var select = document.getElementById('Name');
+        var group = document.getElementById('otherNameGroup');
+        var input = document.getElementById('otherName');
+        function sync() {
+            var other = select.value === '@IraqGovernorates.OtherValue';
+            group.style.display = other ? '' : 'none';
+            input.required = other;
+            if (other) input.focus();
+        }
+        select.addEventListener('change', sync);
+        input.required = select.value === '@IraqGovernorates.OtherValue';
+    })();
+</script>

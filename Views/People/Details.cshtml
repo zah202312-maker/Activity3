@@ -1,0 +1,31 @@
+@model Person
+@{ ViewData["Title"] = Model.Name; }
+<div class="d-flex justify-content-between mb-3"><h3>@Model.Name</h3>
+    <div><a asp-controller="Reports" asp-action="Person" asp-route-id="@Model.Id" class="btn btn-outline-primary">تقرير للطباعة</a>
+         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">تعديل</a>
+         <a asp-action="Index" class="btn btn-outline-secondary">رجوع</a></div></div>
+<div class="card mb-3"><div class="card-body"><div class="row">
+    <div class="col-md-3 text-center mb-3">
+        @if (Model.HasPhoto) { <img src="@Url.Action("Photo", new { id = Model.Id })" class="img-thumbnail" style="max-height:240px" /> }
+        else { <div class="text-muted border rounded py-5">لا توجد صورة</div> }
+    </div>
+    <div class="col-md-9"><dl class="row mb-0">
+        <dt class="col-sm-4">الصفة</dt><dd class="col-sm-8">@Model.Capacity?.DisplayName()</dd>
+        <dt class="col-sm-4">الوظيفة / العنوان</dt><dd class="col-sm-8">@Model.FunctionAddress</dd>
+        <dt class="col-sm-4">الدور الذي قام به</dt><dd class="col-sm-8">@Model.RolePlayed</dd>
+        <dt class="col-sm-4">التحصيل الدراسي</dt><dd class="col-sm-8">@Model.Education</dd>
+        <dt class="col-sm-4">التولد</dt><dd class="col-sm-8">@Model.BirthDate?.ToString("yyyy-MM-dd")@if (Model.BirthDate.HasValue) { <span class="text-muted"> (العمر: @((int)((DateTime.Today - Model.BirthDate.Value).TotalDays / 365.25)))</span> }</dd>
+        <dt class="col-sm-4">محل السكن</dt><dd class="col-sm-8">@Model.Residence</dd>
+        <dt class="col-sm-4">رقم الهاتف</dt><dd class="col-sm-8" dir="ltr" style="text-align:right">@Model.Phone</dd>
+        <dt class="col-sm-4">موظف</dt><dd class="col-sm-8">@(Model.IsEmployee ? "نعم" : "لا")</dd>
+        <dt class="col-sm-4">محافظة العمل / المكتب</dt><dd class="col-sm-8">@Model.Governorate?.Name / @Model.Office?.Name</dd>
+        <dt class="col-sm-4">عدد الدورات الكشفية</dt><dd class="col-sm-8">@Model.ScoutCourses</dd>
+        <dt class="col-sm-4">عدد الشارات</dt><dd class="col-sm-8">@Model.BadgesCount</dd>
+    </dl></div>
+</div></div></div>
+<div class="card"><div class="card-header fw-bold">الأنشطة المشارك بها</div>
+<ul class="list-group list-group-flush">
+@foreach (var a in Model.Activities.OrderByDescending(x => x.Date)) { <li class="list-group-item"><a asp-controller="Activities" asp-action="Details" asp-route-id="@a.Id">#@a.Id - @a.Date?.ToString("yyyy-MM-dd") - @a.ActivityPlace</a></li> }
+@if (!Model.Activities.Any()) { <li class="list-group-item text-muted">لا توجد أنشطة.</li> }
+</ul></div>
+@await Component.InvokeAsync("Attachments", new { ownerType = "Person", ownerId = Model.Id })

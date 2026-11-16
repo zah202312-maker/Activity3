@@ -1,0 +1,13 @@
+@model Office
+@{ ViewData["Title"] = Model.Id == 0 ? "إضافة مكتب" : "تعديل مكتب"; }
+<h3 class="mb-3">@ViewData["Title"]</h3>
+<div class="card"><div class="card-body">
+<form method="post" asp-action="@(Model.Id == 0 ? "Create" : "Edit")" asp-route-id="@Model.Id">
+    <div class="mb-3"><label asp-for="GovernorateId" class="form-label"></label>
+        <select asp-for="GovernorateId" asp-items="ViewBag.Governorates" class="form-select"><option value="">-- اختر --</option></select>
+        <span asp-validation-for="GovernorateId" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Code" class="form-label"></label><input asp-for="Code" class="form-control" /></div>
+    <button class="btn btn-primary">حفظ</button> <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+</form>
+</div></div>

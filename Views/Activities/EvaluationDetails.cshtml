@@ -1,0 +1,186 @@
+@model ActivityApp.Helpers.ActivityEvaluationVm
+@{
+    ViewData["Title"] = "تقييم النشاط #" + Model.Activity.Id;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">تقييم النشاط #@Model.Activity.Id</h3>
+    <a asp-action="Evaluation" class="btn btn-outline-secondary">العودة إلى الأنشطة</a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header fw-bold">بيانات النشاط</div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">عنوان النشاط (الخطة)</dt>
+            <dd class="col-sm-9">@(Model.Activity.Plan?.ActivityTitle ?? "—")</dd>
+            <dt class="col-sm-3">نوع النشاط</dt>
+            <dd class="col-sm-9">@Model.Activity.ActivityType.DisplayName()</dd>
+            <dt class="col-sm-3">المحافظة</dt>
+            <dd class="col-sm-9">@(Model.Activity.Governorate?.Name ?? "—")</dd>
+            <dt class="col-sm-3">المكتب</dt>
+            <dd class="col-sm-9">@(Model.Activity.Office?.Name ?? "—")</dd>
+            <dt class="col-sm-3">عدد الأفراد</dt>
+            <dd class="col-sm-9">@Model.Activity.NumberBeneficiaries</dd>
+            <dt class="col-sm-3">مكان النشاط</dt>
+            <dd class="col-sm-9">@Model.Activity.ActivityPlace</dd>
+            <dt class="col-sm-3">أرسله المستخدم</dt>
+            <dd class="col-sm-9">
+                <span class="fw-semibold">@(string.IsNullOrEmpty(Model.Activity.Creator) ? "—" : Model.Activity.Creator)</span>
+                <small class="text-muted ms-2">@Model.Activity.CreateDate.ToString("yyyy-MM-dd HH:mm")</small>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header fw-bold">مرفقات النشاط</div>
+    <div class="card-body">
+        @if (Model.Attachments.Count == 0)
+        {
+            <p class="text-muted mb-0">لا توجد مرفقات للنشاط.</p>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var file in Model.Attachments)
+                {
+                    var extension = System.IO.Path.GetExtension(file.Name).ToLowerInvariant();
+                    var isImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(extension);
+                    var isVideo = new[] { ".mp4", ".webm", ".mov", ".ogv" }.Contains(extension);
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="border rounded p-2 h-100">
+                            @if (isImage)
+                            {
+                                <img src="@Url.Action("Preview", "Files", new { id = file.Id })" alt="@file.Name" class="img-fluid rounded mb-2" />
+                            }
+                            else if (isVideo)
+                            {
+                                <video controls preload="metadata" class="w-100 rounded mb-2">
+                                    <source src="@Url.Action("Preview", "Files", new { id = file.Id })" type="@file.ContentType" />
+                                    المتصفح لا يدعم تشغيل الفيديو.
+                                </video>
+                            }
+                            <div class="small text-break">@file.Name</div>
+                            <a class="btn btn-sm btn-outline-primary mt-2" asp-controller="Files" asp-action="Download" asp-route-id="@file.Id">تنزيل</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header fw-bold">تقرير النشاط</div>
+    <div class="card-body">
+        @if (Model.Reports.Count == 0)
+        {
+            <p class="text-muted mb-0">لا يوجد تقرير مرفق.</p>
+        }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var file in Model.Reports)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="text-break me-2">@file.Name</span>
+                        <a class="btn btn-sm btn-outline-primary flex-shrink-0" asp-controller="Files" asp-action="Download" asp-route-id="@file.Id">تنزيل التقرير</a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>
+
+<form asp-action="EvaluationDetails" asp-route-id="@Model.Activity.Id" method="post" class="card mt-3">
+    <div class="card-header fw-bold">تقييم النشاط</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="NumberOfPeopleEvaluation" class="form-label">عدد الأفراد</label>
+                <select asp-for="NumberOfPeopleEvaluation" asp-items="Html.GetEnumSelectList<EvaluationRating>()" class="form-select mb-2">
+                    <option value="">-- اختر التقييم --</option>
+                </select>
+                <label asp-for="NumberOfPeopleScore" class="form-label small">الدرجة (من 20)</label>
+                <input asp-for="NumberOfPeopleScore" type="number" min="0" max="20" class="form-control score-input" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ActivityPlaceEvaluation" class="form-label">مكان النشاط</label>
+                <select asp-for="ActivityPlaceEvaluation" asp-items="Html.GetEnumSelectList<EvaluationSuitability>()" class="form-select mb-2">
+                    <option value="">-- اختر الملاءمة --</option>
+                </select>
+                <label asp-for="ActivityPlaceScore" class="form-label small">الدرجة (من 20)</label>
+                <input asp-for="ActivityPlaceScore" type="number" min="0" max="20" class="form-control score-input" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ScoutUniformEvaluation" class="form-label">الزي الكشفي</label>
+                <select asp-for="ScoutUniformEvaluation" asp-items="Html.GetEnumSelectList<ScoutUniformEvaluation>()" class="form-select mb-2">
+                    <option value="">-- اختر نوع الزي --</option>
+                </select>
+                <label asp-for="ScoutUniformScore" class="form-label small">الدرجة (من 20)</label>
+                <input asp-for="ScoutUniformScore" type="number" min="0" max="20" class="form-control score-input" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="FlagsEvaluation" class="form-label">الأعلام</label>
+                <select asp-for="FlagsEvaluation" asp-items="Html.GetEnumSelectList<EvaluationSuitability>()" class="form-select mb-2">
+                    <option value="">-- اختر الملاءمة --</option>
+                </select>
+                <label asp-for="FlagsScore" class="form-label small">الدرجة (من 20)</label>
+                <input asp-for="FlagsScore" type="number" min="0" max="20" class="form-control score-input" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ActivityReportEvaluation" class="form-label">تقرير النشاط</label>
+                <select asp-for="ActivityReportEvaluation" asp-items="Html.GetEnumSelectList<EvaluationSuitability>()" class="form-select mb-2">
+                    <option value="">-- اختر الملاءمة --</option>
+                </select>
+                <label asp-for="ActivityReportScore" class="form-label small">الدرجة (من 5)</label>
+                <input asp-for="ActivityReportScore" type="number" min="0" max="5" class="form-control score-input" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ActivityOrganizationEvaluation" class="form-label">تنظيم النشاط</label>
+                <select asp-for="ActivityOrganizationEvaluation" asp-items="Html.GetEnumSelectList<EvaluationRating>()" class="form-select mb-2">
+                    <option value="">-- اختر التقييم --</option>
+                </select>
+                <label asp-for="ActivityOrganizationScore" class="form-label small">الدرجة (من 15)</label>
+                <input asp-for="ActivityOrganizationScore" type="number" min="0" max="15" class="form-control score-input" />
+            </div>
+        </div>
+        <div class="fw-bold mt-3">المجموع: <span id="scoreTotal">0</span> من 100</div>
+        <div class="alert alert-info mt-3 mb-0" role="status" aria-live="polite">
+            التقييم النهائي: <strong id="overallEvaluation">أدخل الدرجات لعرض التقييم</strong>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">حفظ التقييم</button>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+    var scoreInputs = document.querySelectorAll('.score-input');
+    function updateScoreTotal() {
+        var total = 0;
+        var hasScore = false;
+        scoreInputs.forEach(function (input) {
+            if (input.value !== '') {
+                total += Number(input.value) || 0;
+                hasScore = true;
+            }
+        });
+        document.getElementById('scoreTotal').textContent = total;
+
+        var result = 'أدخل الدرجات لعرض التقييم';
+        if (hasScore) {
+            if (total < 50) result = 'ضعيف';
+            else if (total <= 59) result = 'مقبول';
+            else if (total <= 69) result = 'متوسط';
+            else if (total <= 79) result = 'جيد';
+            else if (total <= 89) result = 'جيد جداً';
+            else result = 'ممتاز';
+        }
+        document.getElementById('overallEvaluation').textContent = result;
+    }
+    scoreInputs.forEach(function (input) {
+        input.addEventListener('input', updateScoreTotal);
+    });
+    updateScoreTotal();
+</script>
+}

@@ -1,0 +1,9 @@
+@model Section
+@{ ViewData["Title"] = Model.Name; }
+<div class="d-flex justify-content-between mb-3"><h3>@Model.Office?.Governorate?.Name / @Model.Office?.Name / @Model.Name</h3><a asp-action="Index" class="btn btn-outline-secondary">رجوع</a></div>
+<div class="card"><div class="card-header fw-bold">الشعب</div>
+<ul class="list-group list-group-flush">
+@foreach (var s in Model.Subsids.OrderBy(x => x.Name)) { <li class="list-group-item"><a asp-controller="Subsids" asp-action="Details" asp-route-id="@s.Id">@s.Name</a></li> }
+@if (!Model.Subsids.Any()) { <li class="list-group-item text-muted">لا توجد شعب.</li> }
+</ul></div>
+@await Component.InvokeAsync("Attachments", new { ownerType = "Section", ownerId = Model.Id })

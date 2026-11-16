@@ -1,0 +1,48 @@
+@model PagedList<Plan>
+@{ ViewData["Title"] = "الخطط"; }
+<div class="d-flex justify-content-between mb-3"><h3>الخطط</h3><a asp-action="Create" class="btn btn-primary">خطة جديدة</a></div>
+
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    <div class="col-md-4"><input name="q" value="@ViewBag.Q" class="form-control" placeholder="بحث بعنوان النشاط أو الجهة المنفذة" /></div>
+    <div class="col-auto form-check pt-2"><input type="checkbox" name="onlyNotExported" value="true" class="form-check-input" id="one" checked="@((bool)(ViewBag.OnlyNotExported ?? false))" /><label for="one" class="form-check-label">غير المصدّرة فقط</label></div>
+    <div class="col-auto"><button class="btn btn-outline-primary">بحث</button></div>
+</form>
+
+<div class="card card-body mb-3">
+    <div class="row g-2 align-items-center">
+        <div class="col-auto">
+            <form id="bulkForm" method="post" asp-antiforgery="true" class="d-inline">
+                <button asp-action="DeleteSelected" class="btn btn-sm btn-danger" onclick="return confirm('حذف الخطط المحددة؟');">حذف المحدد</button>
+                <button asp-action="ExportExcel" class="btn btn-sm btn-success">تصدير المحدد إلى Excel</button>
+            </form>
+            <form method="post" asp-action="ExportExcel" class="d-inline">
+                <input type="hidden" name="onlyNew" value="true" />
+                <button class="btn btn-sm btn-outline-success">تصدير الخطط الجديدة</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th><input type="checkbox" data-check-all="ids" /></th><th>#</th><th>عنوان النشاط</th><th>الجهة المنفذة</th><th>تاريخ النشاط</th><th>الإجراءات</th><th>الموارد</th><th>مصدّرة؟</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td><input type="checkbox" name="ids" value="@p.Id" form="bulkForm" /></td>
+            <td>@p.Id</td><td>@p.ActivityTitle</td><td>@p.ExecutingAgency</td><td>@p.ActivityDate?.ToString("yyyy-MM-dd")</td>
+            <td>@p.Procedures.Count</td><td>@p.FinanceResources.Count</td>
+            <td>@(p.Exported ? "نعم" : "لا")</td>
+            <td class="text-end text-nowrap">
+                <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary">تفاصيل</a>
+                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" onsubmit="return confirm('حذف الخطة؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form>
+            </td>
+        </tr>
+    }
+    @if (!Model.Any()) { <tr><td colspan="9" class="text-center text-muted">لا توجد خطط.</td></tr> }
+    </tbody>
+</table></div></div>
+
+<partial name="_Pagination" model="Model" />

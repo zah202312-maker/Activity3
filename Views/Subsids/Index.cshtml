@@ -1,0 +1,26 @@
+@model PagedList<Subsid>
+@{ ViewData["Title"] = "الشعب"; }
+<div class="d-flex justify-content-between mb-3"><h3>الشعب</h3><a asp-action="Create" class="btn btn-primary">إضافة شعبة</a></div>
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    <div class="col-md-6"><select name="sectionId" class="form-select" asp-items="ViewBag.Sections"><option value="">كل الأقسام</option></select></div>
+    <div class="col-auto"><button class="btn btn-outline-primary">بحث</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>المحافظة</th><th>المكتب</th><th>القسم</th><th>الشعبة</th><th>الرمز</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        <tr>
+            <td>@s.Id</td><td>@s.Section?.Office?.Governorate?.Name</td><td>@s.Section?.Office?.Name</td><td>@s.Section?.Name</td><td>@s.Name</td><td>@s.Code</td>
+            <td class="text-end text-nowrap">
+                <a asp-action="Details" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">تفاصيل</a>
+                <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                <form asp-action="Delete" asp-route-id="@s.Id" method="post" class="d-inline" onsubmit="return confirm('حذف الشعبة؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table></div></div>
+
+<partial name="_Pagination" model="Model" />

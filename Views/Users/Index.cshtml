@@ -1,0 +1,22 @@
+@model PagedList<AppUser>
+@{ ViewData["Title"] = "المستخدمون"; }
+<div class="d-flex justify-content-between mb-3"><h3>المستخدمون</h3><a asp-action="Create" class="btn btn-primary">مستخدم جديد</a></div>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>اسم المستخدم</th><th>النوع</th><th>الأدوار</th><th>الحالة</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var u in Model)
+    {
+        <tr>
+            <td>@u.Id</td><td>@u.UserName</td><td>@u.UserType.DisplayName()</td>
+            <td>@string.Join("، ", u.UserRoles.Select(r => r.Role?.ArRole ?? r.Role?.Name))</td>
+            <td>@if (u.Active) { <span class="badge bg-success">فعّال</span> } else { <span class="badge bg-secondary">معطّل</span> }</td>
+            <td class="text-end text-nowrap">
+                <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                <form asp-action="Delete" asp-route-id="@u.Id" method="post" class="d-inline" onsubmit="return confirm('حذف المستخدم؟');"><button class="btn btn-sm btn-outline-danger">حذف</button></form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table></div></div>
+
+<partial name="_Pagination" model="Model" />
