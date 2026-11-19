@@ -9,6 +9,7 @@
 <div class="card"><div class="card-body"><dl class="row mb-0">
     <dt class="col-sm-3">التاريخ</dt><dd class="col-sm-9">@Model.Date?.ToString("yyyy-MM-dd")</dd>
     <dt class="col-sm-3">نوع النشاط</dt><dd class="col-sm-9">@Model.ActivityType.DisplayName()</dd>
+    <dt class="col-sm-3">اسم الفوج</dt><dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.TroopName) ? "—" : Model.TroopName)</dd>
     <dt class="col-sm-3">المكان</dt><dd class="col-sm-9">@Model.ActivityPlace (@Model.PlaceType.DisplayName())</dd>
     <dt class="col-sm-3">الموقع الإداري</dt><dd class="col-sm-9">@Model.Governorate?.Name / @Model.Office?.Name / @Model.Section?.Name / @Model.Subsid?.Name</dd>
     <dt class="col-sm-3">الخطة</dt><dd class="col-sm-9">@if (Model.Plan != null) { <a asp-controller="Plans" asp-action="Details" asp-route-id="@Model.Plan.Id">@Model.Plan.ActivityTitle</a> }</dd>

@@ -1,0 +1,92 @@
+@model List<Activity>
+@{
+    ViewData["Title"] = Model.Count == 1 ? "تقييم النشاط #" + Model[0].Id : "تقييم " + Model.Count + " أنشطة";
+    string Show(Enum? e) => e == null ? "—" : e.DisplayName();
+    string Score(int? s) => s?.ToString() ?? "—";
+}
+<style>
+    .eval-sheet { margin-bottom: 1.5rem; }
+    .eval-sheet .sheet-title { border-bottom: 3px solid var(--bs-primary); padding-bottom: .4rem; }
+    .eval-sheet table th, .eval-sheet table td { vertical-align: middle; }
+    .eval-result { font-size: 1.15rem; }
+    @@media print {
+        @@page { size: A4 portrait; margin: 14mm; }
+        .eval-sheet { break-after: page; page-break-after: always; margin: 0; border: 0 !important; box-shadow: none !important; }
+        .eval-sheet:last-of-type { break-after: auto; page-break-after: auto; }
+        .eval-sheet .card-body { padding: 0; }
+        .eval-sheet table { font-size: 10.5pt; }
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <h3 class="mb-0">طباعة التقييم <small class="text-muted fs-6">(@Model.Count نشاط)</small></h3>
+    <div class="d-flex gap-2">
+        <a asp-action="Evaluation" class="btn btn-outline-secondary">العودة إلى الأنشطة</a>
+        <button onclick="window.print()" class="btn btn-primary">طباعة / حفظ PDF</button>
+    </div>
+</div>
+<div class="alert alert-info no-print py-2 small">
+    كل نشاط يُطبع في صفحة مستقلة. لحفظ الملف كـ PDF اختر من قائمة الطابعة «Save as PDF» أو «Microsoft Print to PDF».
+</div>
+
+@foreach (var a in Model)
+{
+    var total = (a.NumberOfPeopleScore ?? 0) + (a.ActivityPlaceScore ?? 0) + (a.ScoutUniformScore ?? 0)
+              + (a.FlagsScore ?? 0) + (a.ActivityReportScore ?? 0) + (a.ActivityOrganizationScore ?? 0);
+    <div class="card eval-sheet"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-end sheet-title mb-3">
+            <h4 class="mb-0">استمارة تقييم نشاط</h4>
+            <span class="text-muted">رقم النشاط: #@a.Id</span>
+        </div>
+
+        <h5 class="mb-2">بيانات النشاط</h5>
+        <table class="table table-bordered table-sm mb-3">
+            <tbody>
+                <tr><th style="width:18%">عنوان النشاط (الخطة)</th><td style="width:32%">@(a.Plan?.ActivityTitle ?? "—")</td>
+                    <th style="width:18%">التاريخ</th><td>@(a.Date?.ToString("yyyy-MM-dd") ?? "—")</td></tr>
+                <tr><th>نوع النشاط</th><td>@a.ActivityType.DisplayName()</td>
+                    <th>مكان النشاط</th><td>@(a.ActivityPlace ?? "—")</td></tr>
+                <tr><th>اسم الفوج</th><td colspan="3">@(string.IsNullOrWhiteSpace(a.TroopName) ? "—" : a.TroopName)</td></tr>
+                <tr><th>المحافظة</th><td>@(a.Governorate?.Name ?? "—")</td>
+                    <th>المكتب</th><td>@(a.Office?.Name ?? "—")</td></tr>
+                <tr><th>القسم</th><td>@(a.Section?.Name ?? "—")</td>
+                    <th>الشعبة</th><td>@(a.Subsid?.Name ?? "—")</td></tr>
+                <tr><th>عدد الأفراد</th><td>@(a.NumberBeneficiaries?.ToString() ?? "—")</td>
+                    <th>الكلفة</th><td>@(a.Cost?.ToString() ?? "—")</td></tr>
+                <tr><th>مقيّمو النشاط</th><td colspan="3">@(a.People.Count == 0 ? "—" : string.Join("، ", a.People.Select(p => p.Name)))</td></tr>
+                <tr><th>أرسله المستخدم</th><td colspan="3">@(string.IsNullOrEmpty(a.Creator) ? "—" : a.Creator) <small class="text-muted ms-2">@a.CreateDate.ToString("yyyy-MM-dd HH:mm")</small></td></tr>
+            </tbody>
+        </table>
+
+        <h5 class="mb-2">تفاصيل التقييم</h5>
+        <table class="table table-bordered table-sm mb-3">
+            <thead><tr><th>المعيار</th><th>التقييم</th><th class="text-center" style="width:14%">الدرجة</th><th class="text-center" style="width:14%">من</th></tr></thead>
+            <tbody>
+                <tr><td>عدد الأفراد</td><td>@Show(a.NumberOfPeopleEvaluation)</td><td class="text-center">@Score(a.NumberOfPeopleScore)</td><td class="text-center">20</td></tr>
+                <tr><td>مكان النشاط</td><td>@Show(a.ActivityPlaceEvaluation)</td><td class="text-center">@Score(a.ActivityPlaceScore)</td><td class="text-center">20</td></tr>
+                <tr><td>الزي الكشفي</td><td>@Show(a.ScoutUniformEvaluation)</td><td class="text-center">@Score(a.ScoutUniformScore)</td><td class="text-center">20</td></tr>
+                <tr><td>الأعلام</td><td>@Show(a.FlagsEvaluation)</td><td class="text-center">@Score(a.FlagsScore)</td><td class="text-center">20</td></tr>
+                <tr><td>تقرير النشاط</td><td>@Show(a.ActivityReportEvaluation)</td><td class="text-center">@Score(a.ActivityReportScore)</td><td class="text-center">5</td></tr>
+                <tr><td>تنظيم النشاط</td><td>@Show(a.ActivityOrganizationEvaluation)</td><td class="text-center">@Score(a.ActivityOrganizationScore)</td><td class="text-center">15</td></tr>
+            </tbody>
+            <tfoot><tr><th colspan="2">المجموع</th><th class="text-center">@total</th><th class="text-center">100</th></tr></tfoot>
+        </table>
+
+        <div class="eval-result border rounded p-3 @(a.EvaluationCompleted ? "border-success" : "border-secondary")">
+            <b>النتيجة النهائية:</b>
+            @if (a.EvaluationCompleted)
+            {
+                <span class="fw-bold text-success ms-1">@a.OverallEvaluation</span> <span class="text-muted">(@total من 100)</span>
+            }
+            else
+            {
+                <span class="fw-bold text-secondary ms-1">لم يكتمل التقييم</span>
+            }
+        </div>
+
+        <div class="d-flex justify-content-between mt-5 pt-3 small">
+            <div>توقيع المقيِّم: ........................................</div>
+            <div class="text-muted">تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</div>
+        </div>
+    </div></div>
+}

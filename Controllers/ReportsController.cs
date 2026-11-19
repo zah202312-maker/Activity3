@@ -17,7 +17,28 @@ public class ReportsController : Controller
         ViewBag.Activities = new SelectList(
             (await _db.Activities.OrderByDescending(a => a.Date).Take(300).ToListAsync())
             .Select(a => new { a.Id, Text = $"#{a.Id} - {a.Date:yyyy-MM-dd} - {a.ActivityPlace}" }), "Id", "Text");
+        ViewBag.Offices = new SelectList(await _db.Offices.OrderBy(o => o.Name).ToListAsync(), "Id", "Name");
+        ViewBag.OfficePeople = await _db.People.Where(p => p.OfficeId != null).OrderBy(p => p.Name)
+            .Select(p => new { p.Id, p.Name, p.OfficeId }).ToListAsync();
         return View();
+    }
+
+    /// <summary>تقرير مكتب: أنشطة المكتب، ويمكن حصرها بشخص مقيّم وبفترة زمنية</summary>
+    public async Task<IActionResult> OfficeActivities(int officeId, int? personId, DateTime? fromDate, DateTime? toDate)
+    {
+        var office = await _db.Offices.Include(o => o.Governorate).FirstOrDefaultAsync(o => o.Id == officeId);
+        if (office == null) return NotFound();
+
+        var q = _db.Activities.Include(a => a.Governorate).Include(a => a.Section).Include(a => a.Subsid)
+            .Include(a => a.People).Where(a => a.OfficeId == officeId);
+        if (personId.HasValue) q = q.Where(a => a.People.Any(p => p.Id == personId));
+        if (fromDate.HasValue) q = q.Where(a => a.Date >= fromDate);
+        if (toDate.HasValue) q = q.Where(a => a.Date <= toDate);
+
+        ViewBag.Office = office;
+        ViewBag.Person = personId.HasValue ? await _db.People.FirstOrDefaultAsync(p => p.Id == personId) : null;
+        ViewBag.From = fromDate; ViewBag.To = toDate;
+        return View(await q.OrderBy(a => a.Date).ThenBy(a => a.Id).ToListAsync());
     }
 
     /// <summary>تقرير شخص: كل الأنشطة التي شارك بها (FindPerson)</summary>

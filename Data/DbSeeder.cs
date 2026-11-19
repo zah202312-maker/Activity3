@@ -42,6 +42,8 @@ public static class DbSeeder
     private static void EnsureCurrentSchema(AppDbContext db)
     {
         db.Database.ExecuteSqlRaw("""
+            IF COL_LENGTH(N'dbo.Activities', N'TroopName') IS NULL
+                ALTER TABLE dbo.Activities ADD TroopName nvarchar(250) NULL;
             IF COL_LENGTH(N'dbo.Activities', N'GovernorateId') IS NULL
                 ALTER TABLE dbo.Activities ADD GovernorateId int NULL;
             IF COL_LENGTH(N'dbo.Activities', N'OfficeId') IS NULL

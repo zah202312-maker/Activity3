@@ -32,16 +32,22 @@
         </div>
     </div>
 </form>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <button type="button" id="printSelected" class="btn btn-primary" disabled>🖨 طباعة المحدد (<span id="selectedCount">0</span>)</button>
+    <button type="button" id="clearSelected" class="btn btn-outline-secondary btn-sm" disabled>إلغاء التحديد</button>
+    <small class="text-muted">حدّد نشاطاً أو أكثر (حتى من صفحات مختلفة) ثم اضغط «طباعة المحدد».</small>
+</div>
 <div class="card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead>
-                <tr><th>#</th><th>التاريخ</th><th>المحافظة</th><th>مكان النشاط</th><th>عدد الأفراد</th><th>حالة التقييم</th><th>التقدير النهائي</th><th></th></tr>
+                <tr><th style="width:2.5rem"><input type="checkbox" class="form-check-input" id="selectAll" title="تحديد كل أنشطة الصفحة" /></th><th>#</th><th>التاريخ</th><th>المحافظة</th><th>مكان النشاط</th><th>عدد الأفراد</th><th>حالة التقييم</th><th>التقدير النهائي</th><th></th></tr>
             </thead>
             <tbody>
             @foreach (var activity in Model)
             {
                 <tr>
+                    <td><input type="checkbox" class="form-check-input eval-select" value="@activity.Id" aria-label="تحديد النشاط @activity.Id" /></td>
                     <td>@activity.Id</td>
                     <td>@activity.Date?.ToString("yyyy-MM-dd")</td>
                     <td>@activity.Governorate?.Name</td>
@@ -60,12 +66,13 @@
                     <td>@(activity.OverallEvaluation ?? "—")</td>
                     <td class="text-end">
                         <a asp-action="EvaluationDetails" asp-route-id="@activity.Id" class="btn btn-sm btn-outline-primary">عرض التقييم</a>
+                        <a asp-action="EvaluationPrint" asp-route-ids="@activity.Id" class="btn btn-sm btn-outline-secondary">طباعة</a>
                     </td>
                 </tr>
             }
             @if (Model.Count == 0)
             {
-                <tr><td colspan="8" class="text-center text-muted">لا توجد أنشطة.</td></tr>
+                <tr><td colspan="9" class="text-center text-muted">لا توجد أنشطة.</td></tr>
             }
             </tbody>
         </table>
@@ -73,3 +80,49 @@
 </div>
 
 <partial name="_Pagination" model="Model" />
+
+@section Scripts {
+<script>
+(function () {
+    const KEY = 'evalPrintSelection';
+    const printUrl = '@Url.Action("EvaluationPrint")';
+    let selected = [];
+    try { selected = JSON.parse(sessionStorage.getItem(KEY) || '[]'); } catch { selected = []; }
+
+    const boxes = [...document.querySelectorAll('.eval-select')];
+    const all = document.getElementById('selectAll');
+    const btn = document.getElementById('printSelected');
+    const clear = document.getElementById('clearSelected');
+
+    function save() { try { sessionStorage.setItem(KEY, JSON.stringify(selected)); } catch { } }
+    function refresh() {
+        document.getElementById('selectedCount').textContent = selected.length;
+        btn.disabled = clear.disabled = selected.length === 0;
+        const checked = boxes.filter(b => b.checked).length;
+        all.checked = boxes.length > 0 && checked === boxes.length;
+        all.indeterminate = checked > 0 && checked < boxes.length;
+    }
+    function toggle(id, on) {
+        const i = selected.indexOf(id);
+        if (on && i < 0) selected.push(id);
+        if (!on && i >= 0) selected.splice(i, 1);
+    }
+
+    boxes.forEach(b => {
+        b.checked = selected.includes(b.value);
+        b.addEventListener('change', () => { toggle(b.value, b.checked); save(); refresh(); });
+    });
+    all.addEventListener('change', () => {
+        boxes.forEach(b => { b.checked = all.checked; toggle(b.value, all.checked); });
+        save(); refresh();
+    });
+    clear.addEventListener('click', () => {
+        selected = []; boxes.forEach(b => b.checked = false); save(); refresh();
+    });
+    btn.addEventListener('click', () => {
+        if (selected.length) location.href = printUrl + '?' + selected.map(id => 'ids=' + encodeURIComponent(id)).join('&');
+    });
+    refresh();
+})();
+</script>
+}

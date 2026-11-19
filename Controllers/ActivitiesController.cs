@@ -129,6 +129,24 @@ public class ActivitiesController : Controller
         });
     }
 
+    /// <summary>طباعة تقييم نشاط واحد أو عدة أنشطة (كل نشاط في صفحة مستقلة)</summary>
+    [Authorize(Roles = "Admin"), HttpGet]
+    public async Task<IActionResult> EvaluationPrint([FromQuery] int[] ids)
+    {
+        var list = ids.Distinct().Take(200).ToList();
+        if (list.Count == 0) return RedirectToAction(nameof(Evaluation));
+
+        var activities = await _db.Activities
+            .Include(a => a.People).Include(a => a.Governorate).Include(a => a.Office)
+            .Include(a => a.Section).Include(a => a.Subsid).Include(a => a.Plan)
+            .Where(a => list.Contains(a.Id))
+            .ToListAsync();
+        if (activities.Count == 0) return NotFound();
+
+        // بنفس ترتيب الاختيار
+        return View(activities.OrderBy(a => list.IndexOf(a.Id)).ToList());
+    }
+
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EvaluationDetails(int id)
     {
@@ -306,7 +324,7 @@ public class ActivitiesController : Controller
 
         a.Date = m.Date; a.Cost = m.Cost; a.ActivityType = m.ActivityType; a.ActivityPlace = m.ActivityPlace;
         a.PlaceType = m.PlaceType; a.Resources = m.Resources; a.NumberBeneficiaries = m.NumberBeneficiaries;
-        a.NoteBeneficiaries = m.NoteBeneficiaries; a.Note = m.Note;
+        a.NoteBeneficiaries = m.NoteBeneficiaries; a.Note = m.Note; a.TroopName = m.TroopName;
         a.GovernorateId = m.GovernorateId; a.OfficeId = m.OfficeId; a.SectionId = m.SectionId;
         a.SubsidId = m.SubsidId; a.PlanId = m.PlanId;
 

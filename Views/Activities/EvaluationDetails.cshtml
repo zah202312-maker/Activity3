@@ -4,7 +4,10 @@
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="mb-0">تقييم النشاط #@Model.Activity.Id</h3>
-    <a asp-action="Evaluation" class="btn btn-outline-secondary">العودة إلى الأنشطة</a>
+    <div class="d-flex gap-2">
+        <a asp-action="EvaluationPrint" asp-route-ids="@Model.Activity.Id" class="btn btn-outline-primary">🖨 طباعة التقييم</a>
+        <a asp-action="Evaluation" class="btn btn-outline-secondary">العودة إلى الأنشطة</a>
+    </div>
 </div>
 
 <div class="card mb-3">
@@ -15,6 +18,8 @@
             <dd class="col-sm-9">@(Model.Activity.Plan?.ActivityTitle ?? "—")</dd>
             <dt class="col-sm-3">نوع النشاط</dt>
             <dd class="col-sm-9">@Model.Activity.ActivityType.DisplayName()</dd>
+            <dt class="col-sm-3">اسم الفوج</dt>
+            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Activity.TroopName) ? "—" : Model.Activity.TroopName)</dd>
             <dt class="col-sm-3">المحافظة</dt>
             <dd class="col-sm-9">@(Model.Activity.Governorate?.Name ?? "—")</dd>
             <dt class="col-sm-3">المكتب</dt>

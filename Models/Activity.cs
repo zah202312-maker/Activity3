@@ -9,6 +9,7 @@ public class Activity : BaseEntity
     [Display(Name = "الكلفة")] public int? Cost { get; set; }
     [Display(Name = "نوع النشاط")] public ActivityType ActivityType { get; set; }
     [StringLength(250), Display(Name = "مكان النشاط")] public string? ActivityPlace { get; set; }
+    [StringLength(250), Display(Name = "اسم الفوج")] public string? TroopName { get; set; }
     [Display(Name = "نوع المكان")] public PlaceType PlaceType { get; set; }
     [StringLength(500), Display(Name = "الموارد")] public string? Resources { get; set; }
     [Display(Name = "عدد الأفراد")] public int? NumberBeneficiaries { get; set; }

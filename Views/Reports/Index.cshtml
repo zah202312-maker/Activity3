@@ -17,3 +17,52 @@
             <button class="btn btn-primary">عرض</button>
         </form></div></div></div>
 </div>
+
+<div class="card mt-3"><div class="card-header fw-bold">تقرير أنشطة مكتب</div><div class="card-body">
+    <form method="get" asp-action="OfficeActivities" id="officeReportForm">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">المكتب</label>
+                <select name="officeId" id="reportOffice" class="form-select" asp-items="ViewBag.Offices" required><option value="">-- اختر المكتب --</option></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">الشخص مقيّم النشاط</label>
+                <select name="personId" id="reportPerson" class="form-select" disabled>
+                    <option value="">-- كل الأشخاص --</option>
+                    @foreach (var p in (IEnumerable<dynamic>)ViewBag.OfficePeople)
+                    {
+                        <option value="@p.Id" data-office="@p.OfficeId" hidden>@p.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">من تاريخ</label>
+                <input type="date" name="fromDate" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">إلى تاريخ</label>
+                <input type="date" name="toDate" class="form-control" />
+            </div>
+            <div class="col-md-2"><button class="btn btn-primary w-100">عرض</button></div>
+        </div>
+    </form>
+</div></div>
+
+@section Scripts {
+<script>
+(function () {
+    const office = document.getElementById('reportOffice');
+    const person = document.getElementById('reportPerson');
+    function filterPeople() {
+        const id = office.value;
+        person.value = '';
+        person.disabled = !id;
+        for (const o of person.options) {
+            if (o.dataset.office !== undefined) o.hidden = o.dataset.office !== id;
+        }
+    }
+    office.addEventListener('change', filterPeople);
+    filterPeople();
+})();
+</script>
+}
